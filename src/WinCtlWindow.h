@@ -30,6 +30,7 @@ private:
 	static NAN_METHOD(getParent);
 	static NAN_METHOD(getAncestor);
 	static NAN_METHOD(getMonitor);
+  static NAN_METHOD(getFileName);
 
 	static NAN_METHOD(setForegroundWindow);
 	static NAN_METHOD(setWindowPos);

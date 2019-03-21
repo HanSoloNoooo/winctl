@@ -1,5 +1,6 @@
 #include "WinCtlWindow.h"
 #include "windows.h"
+#include <psapi.h>
 
 #pragma warning ( disable:4311 )
 #pragma warning ( disable:4302 )
@@ -19,6 +20,7 @@ NAN_MODULE_INIT(Window::Init) {
 	Nan::SetPrototypeMethod(tpl, "getParent", getParent);
 	Nan::SetPrototypeMethod(tpl, "getAncestor", getAncestor);
 	Nan::SetPrototypeMethod(tpl, "getMonitor", getMonitor);
+  Nan::SetPrototypeMethod(tpl, "getFileName", getFileName);
 
 	Nan::SetPrototypeMethod(tpl, "setForegroundWindow", setForegroundWindow);
 	Nan::SetPrototypeMethod(tpl, "setWindowPos", setWindowPos);
@@ -108,10 +110,6 @@ NAN_METHOD(Window::EnumerateWindows) {
 	EnumWindows(EnumWindowsProc, 0);
 }
 
-
-
-
-
 NAN_METHOD(Window::exists) {
 	Window* obj = Nan::ObjectWrap::Unwrap<Window>(info.This());
 
@@ -146,6 +144,17 @@ NAN_METHOD(Window::getClassName) {
 	GetClassName(obj->windowHandle, wnd_cn, sizeof(wnd_cn));
 
 	info.GetReturnValue().Set(Nan::New(wnd_cn).ToLocalChecked());
+}
+
+NAN_METHOD(Window::getFileName) {
+  Window* obj = Nan::ObjectWrap::Unwrap<Window>(info.This());
+  DWORD lpdwProcessId;
+	GetWindowThreadProcessId(obj->windowHandle, &lpdwProcessId);
+  HANDLE hProc = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, lpdwProcessId);
+  char wnd_fn[1024];
+
+  GetModuleFileNameEx(hProc, NULL, wnd_fn, sizeof(wnd_fn));
+	info.GetReturnValue().Set(Nan::New(wnd_fn).ToLocalChecked());
 }
 
 NAN_METHOD(Window::getPid) {
@@ -194,18 +203,6 @@ NAN_METHOD(Window::getMonitor) {
 
 	info.GetReturnValue().Set(result);
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 NAN_METHOD(Window::setForegroundWindow) {
